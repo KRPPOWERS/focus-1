@@ -35,15 +35,23 @@ jobs:
           curl -sL "https://github.com/gradle/gradle/raw/v8.7.0/gradle/wrapper/gradle-wrapper.jar" \
             -o gradle/wrapper/gradle-wrapper.jar
 
-      - name: Verify Gradle version
-        run: gradle --version
+      - name: Fix Java source issues
+        run: |
+          python3 << 'PYEOF'
+          import os, glob, re
 
-      - name: Build Debug APK
-        run: gradle assembleDebug --stacktrace
+          for path in glob.glob('app/src/**/*.java', recursive=True):
+              with open(path, 'r', encoding='utf-8', errors='ignore') as f:
+                  content = f.read()
+              new = content
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: FocusGuard-debug
-          path: app/build/outputs/apk/debug/app-debug.apk
-          retention-days: 30
+              # Fix 1: curly/smart quotes -> straight quotes
+              new = new.replace('\u201c', '\\"').replace('\u201d', '\\"')
+              new = new.replace('\u2018', "'").replace('\u2019', "'")
+              new = new.replace('\u2013', '-').replace('\u2014', '-')
+
+              # Fix 2: duplicate tvEmpty variable in AppSelectorActivity
+              # Remove the second declaration inside the catch block
+              new = new.replace(
+                  'TextView tvEmpty = findViewById(R.id.tvEmpty);\n                    tvEmpty.setVisibility(android.view.View.VISIBLE);\n                    tvEmpty.setText("Error loading apps: " + e.getMessage());',
+                  'findViewById(R.id.tvEmpty).setVisibility(android.view.View.VISIBLE);\n                    ((andro
