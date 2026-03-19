@@ -32,19 +32,4 @@ jobs:
 
       - name: Download Gradle Wrapper JAR
         run: |
-          curl -sL "https://github.com/gradle/gradle/raw/v8.7.0/gradle/wrapper/gradle-wrapper.jar" \
-            -o gradle/wrapper/gradle-wrapper.jar
-
-      - name: Fix Java source issues
-        run: |
-          cat > /tmp/fix.py << ENDOFSCRIPT
-          import os, glob, re
-
-          for path in glob.glob("app/src/**/*.java", recursive=True):
-              with open(path, "r", encoding="utf-8", errors="ignore") as f:
-                  content = f.read()
-              new = content
-
-              new = new.replace("\u201c", '\\"').replace("\u201d", '\\"')
-              new = new.replace("\u2018", "'").replace("\u2019", "'")
-              new =
+          curl -sL "https://github.com/gradle/gradle/raw/v8.7.0/gr
